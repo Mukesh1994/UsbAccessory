@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = getIntent();
             mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
             mAccessory = intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-
+            // temp
             if (mAccessory != null) {
                 mText.append("Device in accessory mode\n Connected to Host!");
 
