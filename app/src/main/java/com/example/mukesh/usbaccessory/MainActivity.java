@@ -1,6 +1,5 @@
 package com.example.mukesh.usbaccessory;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbAccessory;
@@ -15,10 +14,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,13 +25,15 @@ public class MainActivity extends AppCompatActivity {
     TextView mText;
     UsbManager mUsbManager ;
     UsbAccessory mAccessory;
-    ParcelFileDescriptor mFileDescriptor;
+    ParcelFileDescriptor mFileDescriptor;                      // for reading/writing
     FileInputStream mInputStream;
     FileOutputStream mOutputStream;
     String msg = "Debuging :";
+
+    /*
     Runnable Readmessage = new Runnable() {
         @Override
-        public void run() {
+        public void run() {                              // for reading message from Host..
 
             byte[] buffer = new byte[5];
             int ret;
@@ -56,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             Message += System.getProperty("line.separator");
-            mText.append(Message);
+            mText.append(Message);                               // showing data received from user  ..
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -66,17 +65,32 @@ public class MainActivity extends AppCompatActivity {
             new Thread(this).start();
         }
     };
+
+
+     // making broadcast receiver ...
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.d(msg,"doing " +action);
+            Log.d(msg, "doing " + action);
             if (ACTION_USB_PERMISSION.equals(action)) {
 
                 synchronized (this) {
                     mAccessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-                    if (mAccessory != null) mText.append("success!");
-                   mText.append("thank you");
+                    if (mAccessory != null) {
+
+                         mText.append("Connected to Host!!");
+                    }
+                    else
+                    {
+                        mText.append("You opened directly");
+                        return ;
+                    }
+
+
+
+
+
                     try {
                         mFileDescriptor = (mUsbManager.openAccessory(mAccessory));
                     } catch (NullPointerException e) {
@@ -107,46 +121,42 @@ public class MainActivity extends AppCompatActivity {
                     else {
                         Log.d(msg, "permission denied for accessory " + mAccessory);
                     }
+
                 }
+
             }
         }
     };
-    private int accessory_filter;
+*/
+
+    // private int accessory_filter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        mText = (TextView)findViewById(R.id.textView);
-        mText.setMovementMethod(new ScrollingMovementMethod());
-        //accessory_filter = R.xml.accessory_filter;
-        //mText.append(accessory_filter.)
-       // Intent intent = getIntent();
-       // mAccessory =  intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-        Intent intent = getIntent();
-        mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        mAccessory = intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-        if (mAccessory == null) {
-            mText.append("Not started by the script directly");
-
-            return;
-        } else
-            mText.append("Success");
-        // PendingIntent mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
-        // IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        // registerReceiver(mUsbReceiver, filter);
-        // mUsbManager.requestPermission(mAccessory,mPermissionIntent);
-
-       /* if(mAccessory==null)
+    protected void onCreate(Bundle savedInstanceState)
         {
-            mText.append("Not started by the accessory directly" +
-                    System.getProperty("line.separator"));
-            return;
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            mText = (TextView) findViewById(R.id.textView);
+            mText.setMovementMethod(new ScrollingMovementMethod());
+            Intent intent = getIntent();
+            mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+            mAccessory = intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+
+            if (mAccessory != null) {
+                mText.append("Device in accessory mode\n Connected to Host!");
+
+            } else
+                mText.append("Directly opened by u");
+        /*
+             PendingIntent mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+             IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+             registerReceiver(mUsbReceiver, filter);
+             mUsbManager.requestPermission(mAccessory, mPermissionIntent);
+         */
         }
-        */
-    }
+
 
     @Override
     protected void onStart() {
@@ -156,8 +166,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
         Log.d(msg, "The onResume() event");
     }
+
 
     @Override
     protected void onPause(){
@@ -171,11 +183,21 @@ public class MainActivity extends AppCompatActivity {
     /** Called when the activity is no longer visible. */
     @Override
     protected void onStop() {
+
         super.onStop();
+
+     /*
+        try {
+            mFileDescriptor.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+     */
         Log.d(msg, "The onStop() event");
     }
 
     /** Called just before the activity is destroyed. */
+
     @Override
     public void onDestroy() {
         super.onDestroy();
